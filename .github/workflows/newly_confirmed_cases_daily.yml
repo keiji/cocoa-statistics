@@ -35,5 +35,5 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages
-          FOLDER: ${{ github.workspace }}/output/v1/newly_confirmed_cases_daily/latest.csv
+          FOLDER: ${{ github.workspace }}/output/v1/newly_confirmed_cases_daily
           CLEAN: false
