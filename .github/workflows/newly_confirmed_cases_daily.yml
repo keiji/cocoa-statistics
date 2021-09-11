@@ -3,10 +3,6 @@
 name: newly_confirmed_cases_daily
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
   schedule:
     - cron:  '0 */2 * * *'
 
