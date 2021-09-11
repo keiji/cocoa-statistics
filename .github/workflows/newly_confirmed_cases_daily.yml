@@ -27,11 +27,11 @@ jobs:
       - name: Convert
         run: |
           cd ${{ github.workspace }}/opendata-converters
-          python3 main.py --output_path ${{ github.workspace }}/latest.csv
+          python3 main.py --output_path ${{ github.workspace }}/output/latest.csv
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: newly_confirmed_cases_latest
-          FOLDER: ${{ github.workspace }}/latest.csv
+          FOLDER: ${{ github.workspace }}/output
           CLEAN: true
