@@ -1,16 +1,48 @@
-# This is a sample Python script.
+import csv
+import os
+import tempfile
+from urllib import request
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+from absl import flags, app
+
+FLAGS = flags.FLAGS
+flags.DEFINE_string("tmp_path", "/tmp", "Temporary Path")
+flags.DEFINE_string("output_path", "./latest.csv", "Output-file path")
+
+OPENDATA_URL = "https://covid19.mhlw.go.jp/public/opendata/newly_confirmed_cases_daily.csv"
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+def _download_opendata():
+    fd, tmpfile = tempfile.mkstemp(dir=FLAGS.tmp_path, suffix='.csv', text=True)
+    req = request.Request(OPENDATA_URL)
+    with request.urlopen(req) as res:
+        os.write(fd, res.read())
+    os.close(fd)
+    return tmpfile
 
 
-# Press the green button in the gutter to run the script.
+def _save(csv_rows):
+    with open(FLAGS.output_path, mode='w') as fp:
+        writer = csv.writer(fp)
+        for row in csv_rows:
+            writer.writerow(row)
+
+
+def main(argv):
+    del argv  # Unused.
+
+    csv_file = _download_opendata()
+    try:
+        with open(csv_file, 'r') as fp:
+            reader = list(csv.reader(fp))
+            latest_day = reader[-1][0]
+            print(latest_day)
+
+            filtered_rows = filter(lambda row: row[0] == latest_day, reader)
+            _save(filtered_rows)
+    finally:
+        os.remove(csv_file)
+
+
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    app.run(main)
