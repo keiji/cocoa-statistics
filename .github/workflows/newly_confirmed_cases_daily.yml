@@ -1,0 +1,33 @@
+# This is a basic workflow to help you get started with Actions
+
+name: newly_confirmed_cases_daily
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Convert
+        run: |
+          cd ${{ github.workspace }}/opendata-converters
+          python3 main.py --output_path ${{ github.workspace }}/latest.csv
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: newly_confirmed_cases_latest
+          FOLDER: ${{ github.workspace }}/latest.csv
+          CLEAN: true
