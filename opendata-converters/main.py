@@ -7,7 +7,7 @@ from absl import flags, app
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string("tmp_path", "/tmp", "Temporary Path")
-flags.DEFINE_string("output_path", "./latest.csv", "Output-file path")
+flags.DEFINE_string("output_path", "./test/latest.csv", "Output-file path")
 
 OPENDATA_URL = "https://covid19.mhlw.go.jp/public/opendata/newly_confirmed_cases_daily.csv"
 
@@ -30,6 +30,9 @@ def _save(csv_rows):
 
 def main(argv):
     del argv  # Unused.
+
+    dir = os.path.dirname(FLAGS.output_path)
+    os.makedirs(dir, exist_ok=True)
 
     csv_file = _download_opendata()
     try:
