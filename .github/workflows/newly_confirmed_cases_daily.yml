@@ -4,7 +4,7 @@ name: newly_confirmed_cases_daily
 
 on:
   schedule:
-    - cron:  '0 */6 * * *'
+    - cron:  '0 */4 * * *'
 
   workflow_dispatch:
 
