@@ -33,3 +33,5 @@ jobs:
           BRANCH: gh-pages
           FOLDER: ${{ github.workspace }}/output
           CLEAN: false
+          git-config-name: Periodic commit
+          git-config-email: noreply@keiji.dev
