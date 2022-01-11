@@ -19,7 +19,7 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string("tmp_path", "/tmp/cocoa_diagnosis_keys", "Temporary Path")
 flags.DEFINE_string("output_path", "./v1/cocoa_diagnosis_keys/latest.csv", "Output-file path")
 
-COCOA_DIAGNOSIS_KEYS_FILES_URL = os.environ['COCOA_DIAGNOSIS_KEYS_FILES_URL']
+COCOA_DIAGNOSIS_KEYS_LIST_URL = os.environ['COCOA_DIAGNOSIS_KEYS_LIST_URL']
 
 FILENAME_EXPORT_BIN = "export.bin"
 BIN_HEADER = "EK Export v1    "
@@ -40,7 +40,7 @@ class Entry:
 
 def _download_diagnosis_keys_list():
     fd, tmpfile = tempfile.mkstemp(dir=FLAGS.tmp_path, suffix='.json', text=True)
-    req = request.Request(COCOA_DIAGNOSIS_KEYS_FILES_URL)
+    req = request.Request(COCOA_DIAGNOSIS_KEYS_LIST_URL)
     with request.urlopen(req) as res:
         os.write(fd, res.read())
     os.close(fd)
