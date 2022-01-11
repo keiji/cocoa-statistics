@@ -114,47 +114,39 @@ def _print(diagnosis_keys):
     print(diagnosis_keys.revised_keys)
 
 
-def _is_valid_transmission_risk_level_key(created, rolling_start_interval_number, key):
+def _is_valid_transmission_risk_level_key(key):
     # https://developer.apple.com/documentation/exposurenotification/enexposureinfo/3583716-transmissionrisklevel
     if key.transmission_risk_level >= 0 or key.transmission_risk_level <= 7:
-        return True
+        return True, ""
 
-    print("value transmission_risk_level %d is invalid, created: %d, rolling_start_interval_number: %d"
-          % (key.report_type, created, rolling_start_interval_number))
-    return False
+    return False, "value transmission_risk_level %d" % key.report_type
 
 
-def _is_valid_report_type_key(created, rolling_start_interval_number, key):
+def _is_valid_report_type_key(key):
     # https://developer.apple.com/documentation/exposurenotification/endiagnosisreporttype
     if key.report_type >= 0 or key.report_type <= 5:
-        return True
+        return True, ""
 
-    print("value report_type %d is invalid, created: %d, rolling_start_interval_number: %d"
-          % (key.report_type, created, rolling_start_interval_number))
-    return False
+    return False, "value report_type %d is invalid." % key.report_type
 
 
-def _is_valid_days_since_onset_of_symptoms_key(created, rolling_start_interval_number, key):
+def _is_valid_days_since_onset_of_symptoms_key(key):
     # https://developers.google.com/android/exposure-notifications/meaningful-exposures
     if key.days_since_onset_of_symptoms >= -14 or key.days_since_onset_of_symptoms <= 14:
-        return True
+        return True, ""
 
-    print("value days_since_onset_of_symptoms %d is invalid, created: %d, rolling_start_interval_number: %d"
-          % (key.days_since_onset_of_symptoms, created, rolling_start_interval_number))
-    return False
+    return False, "value days_since_onset_of_symptoms %d is invalid." % key.days_since_onset_of_symptoms
 
 
-def _is_valid_temporary_exposure_key_key(created, rolling_start_interval_number, key):
+def _is_valid_temporary_exposure_key_key(key):
     # Temporary Exposure Key
     # The use of 16-byte keys limits the server and device requirements for transferring and storing
     # Diagnosis Keys while preserving low false-positive probabilities.
     # https://blog.google/documents/69/Exposure_Notification_-_Cryptography_Specification_v1.2.1.pdf/
     if len(key.key_data) == 16:
-        return True
+        return True, ""
 
-    print("key_data %s length %d is invalid, created: %d, rolling_start_interval_number: %d"
-          % (base64.b64encode(key.key_data), len(key.key_data), created, rolling_start_interval_number))
-    return False
+    return False, "key_data %s length %d is invalid." % (base64.b64encode(key.key_data), len(key.key_data))
 
 
 def _statistics_keys(created, rolling_start_interval_number, keys):
@@ -166,18 +158,34 @@ def _statistics_keys(created, rolling_start_interval_number, keys):
         statistics_data.key_count += 1
 
         is_valid_key = True
-        if not _is_valid_transmission_risk_level_key(created, rolling_start_interval_number, key):
+
+        messages = []
+
+        is_valid, message = _is_valid_transmission_risk_level_key(key)
+        if not is_valid:
             statistics_data.invalid_transmission_risk_level_key_count += 1
             is_valid_key = False
-        if not _is_valid_report_type_key(created, rolling_start_interval_number, key):
+            messages.append(message)
+
+        is_valid, message = _is_valid_report_type_key(key)
+        if not is_valid:
             statistics_data.invalid_transmission_risk_level_key_count += 1
             is_valid_key = False
-        if not _is_valid_days_since_onset_of_symptoms_key(created, rolling_start_interval_number, key):
+            messages.append(message)
+
+        is_valid, message = _is_valid_days_since_onset_of_symptoms_key(key)
+        if not is_valid:
             statistics_data.invalid_transmission_risk_level_key_count += 1
             is_valid_key = False
-        if not _is_valid_temporary_exposure_key_key(created, rolling_start_interval_number, key):
+            messages.append(message)
+
+        is_valid, message = _is_valid_temporary_exposure_key_key(key)
+        if not is_valid:
             statistics_data.invalid_key_data_count += 1
             is_valid_key = False
+            messages.append(message)
+
+        statistics_data.comment = "|".join(messages)
 
         if is_valid_key:
             statistics_data.valid_key_count += 1

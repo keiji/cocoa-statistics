@@ -27,6 +27,7 @@ class StatisticsData:
     transmission_risk_level_distribution = {}
     report_type_distribution = {}
     days_since_onset_of_symptoms_distribution = {}
+    comment = ""
 
     def __init__(self):
         self.key_count = 0
@@ -47,6 +48,8 @@ class StatisticsData:
         for day in range(-14, 14 + 1):
             self.days_since_onset_of_symptoms_distribution[day] = 0
 
+        self.comment = ""
+
     def __str__(self):
         return "StatisticsData( \n" \
                "created: %d, \n" \
@@ -63,6 +66,7 @@ class StatisticsData:
                "transmission_risk_level_distribution: %s, \n" \
                "report_type_distribution: %s, \n" \
                "days_since_onset_of_symptoms_distribution: %s, \n" \
+               "comment: %s, \n" \
                ")" % (self.created,
                       self.rolling_start_interval_number,
                       _rolling_start_interval_number_to_date(self.rolling_start_interval_number).strftime(
@@ -77,6 +81,7 @@ class StatisticsData:
                       self.transmission_risk_level_distribution,
                       self.report_type_distribution,
                       self.days_since_onset_of_symptoms_distribution,
+                      self.comment,
                       )
 
     @staticmethod
@@ -149,6 +154,7 @@ class StatisticsData:
             "days_since_onset_of_symptoms_+12_count",
             "days_since_onset_of_symptoms_+13_count",
             "days_since_onset_of_symptoms_+14_count",
+            "comment",
         ])
 
     def write_to_csv(self, csv_writer):
@@ -206,4 +212,5 @@ class StatisticsData:
             self.days_since_onset_of_symptoms_distribution[+12],
             self.days_since_onset_of_symptoms_distribution[+13],
             self.days_since_onset_of_symptoms_distribution[+14],
+            self.comment,
         ])

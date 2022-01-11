@@ -28,13 +28,15 @@ def _dummy_statistics_keys():
     for key in range(-14, 15):
         statistics_data.days_since_onset_of_symptoms_distribution[key] = 10000 + key
 
+    statistics_data.comment = "this is comment"
+
     return statistics_data
 
 
 class TestStatisticsData(unittest.TestCase):
 
     def test_csv(self):
-        expected_csv = "1,2,1970-01-01T09:20:00.000000+0900,3,8,7,4,5,6,10,9,100,101,102,103,104,105,106,1000,1001,1002,1003,1004,1005,9986,9987,9988,9989,9990,9991,9992,9993,9994,9995,9996,9997,9998,9999,10000,10001,10002,10003,10004,10005,10006,10007,10008,10009,10010,10011,10012,10013,10014\r\n"
+        expected_csv = "1,2,1970-01-01T09:20:00.000000+0900,3,8,7,4,5,6,10,9,100,101,102,103,104,105,106,1000,1001,1002,1003,1004,1005,9986,9987,9988,9989,9990,9991,9992,9993,9994,9995,9996,9997,9998,9999,10000,10001,10002,10003,10004,10005,10006,10007,10008,10009,10010,10011,10012,10013,10014,this is comment\r\n"
 
         string_io = io.StringIO()
         writer = csv.writer(string_io)
