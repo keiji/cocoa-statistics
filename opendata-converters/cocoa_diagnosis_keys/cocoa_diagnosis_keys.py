@@ -13,13 +13,13 @@ from urllib import request
 from absl import flags, app
 
 import protobuf.temporary_exposure_key_export_pb2 as tek_export
-from statistics import StatisticsData, _rolling_start_interval_number_to_date, EN_INTERVAL_WINDOW
+from statistics import StatisticsData, EN_INTERVAL_WINDOW
 
 FLAGS = flags.FLAGS
+flags.DEFINE_string("diagnosis_keys_list_url", None, "URL of the server that is providing the diagnosis-keys list.")
 flags.DEFINE_string("tmp_path", "/tmp/cocoa_diagnosis_keys", "Temporary Path")
 flags.DEFINE_string("output_path", "./v1/cocoa_diagnosis_keys/latest.csv", "Output-file path")
-
-COCOA_DIAGNOSIS_KEYS_LIST_URL = os.environ['COCOA_DIAGNOSIS_KEYS_LIST_URL']
+flags.DEFINE_boolean("verbose", True, "Output verbose")
 
 FILENAME_EXPORT_BIN = "export.bin"
 BIN_HEADER = "EK Export v1    "
@@ -38,9 +38,9 @@ class Entry:
         self.zip_file_path = zip_file_path
 
 
-def _download_diagnosis_keys_list():
+def _download_diagnosis_keys_list(diagnosis_keys_list_url):
     fd, tmpfile = tempfile.mkstemp(dir=FLAGS.tmp_path, suffix='.json', text=True)
-    req = request.Request(COCOA_DIAGNOSIS_KEYS_LIST_URL)
+    req = request.Request(diagnosis_keys_list_url)
     with request.urlopen(req) as res:
         os.write(fd, res.read())
     os.close(fd)
@@ -88,30 +88,6 @@ def _get_diagnosis_keys(bin_file_path):
 def _rolling_period_to_timedelta(rolling_period):
     epoch = rolling_period * EN_INTERVAL_WINDOW
     return datetime.timedelta(seconds=epoch)
-
-
-def _print(diagnosis_keys):
-    print(diagnosis_keys.start_timestamp)
-    print(diagnosis_keys.end_timestamp)
-    print(diagnosis_keys.region)
-    print(diagnosis_keys.batch_num)
-    print(diagnosis_keys.batch_size)
-    for key in diagnosis_keys.keys:
-        print(key.transmission_risk_level)
-        print(_rolling_start_interval_number_to_date(key.rolling_start_interval_number))
-        print(_rolling_period_to_timedelta(key.rolling_period))
-
-        if not key.HasField("report_type"):
-            print("Field report_type not exist.")
-        else:
-            print(key.report_type)
-
-        if not key.HasField("days_since_onset_of_symptoms"):
-            print("Field days_since_onset_of_symptoms not exist.")
-        else:
-            print(key.days_since_onset_of_symptoms)
-
-    print(diagnosis_keys.revised_keys)
 
 
 def _is_valid_transmission_risk_level_key(key):
@@ -209,21 +185,85 @@ def _statistics(diagnosis_keys_entries):
     statistics_list = []
 
     for created, entries in groupby(diagnosis_keys_entries, key=lambda entry: entry.created):
-        print("%d" % created)
-
         # Extract keys
         keys = list(itertools.chain.from_iterable((map(lambda entry: entry.diagnosis_keys.keys, entries))))
 
         for rolling_start_interval_number, keys in groupby(keys, key=lambda key: key.rolling_start_interval_number):
-            print("    %d" % rolling_start_interval_number)
             statistics_data = _statistics_keys(created, rolling_start_interval_number, keys)
             statistics_list.append(statistics_data)
 
     return statistics_list
 
 
+DICT_TRANSMISSION_RISK_LEVEL = {
+    0: "Unused/Custom",
+    1: "Confirmed test: Low transmission risk level",
+    2: "Confirmed test: Standard transmission risk level",
+    3: "Confirmed test: High transmission risk level",
+    4: "Confirmed clinical diagnosis",
+    5: "Self report",
+    6: "Negative case",
+    7: "Recursive case",
+}
+
+DICT_REPORT_TYPE = {
+    0: "unknown",
+    1: "confirmedTest",
+    2: "confirmedClinicalDiagnosis",
+    3: "selfReported",
+    4: "recursive",
+    5: "revoked",
+}
+
+
+def _print_key(key, index):
+    key_data = base64.b64encode(key.key_data).decode('utf-8')
+
+    print("     * Index %d" % index)
+    print("       * key_data: %s" % key_data)
+    print("       * transmission_risk_level: %s" % DICT_TRANSMISSION_RISK_LEVEL[key.transmission_risk_level])
+    print("       * rolling_start_interval_number: %s" % key.rolling_start_interval_number)
+    print("       * rolling_period: %s" % key.rolling_period)
+
+    if not key.HasField("report_type"):
+        print("       * report_type: N/A")
+    else:
+        print("       * %s" % DICT_REPORT_TYPE[key.report_type])
+
+    if not key.HasField("days_since_onset_of_symptoms"):
+        print("       * days_since_onset_of_symptoms: N/A")
+    else:
+        print("       * %d" % key.days_since_onset_of_symptoms)
+
+
+def _print(entry):
+    file_name = os.path.basename(entry.zip_file_path)
+    diagnosis_keys = entry.diagnosis_keys
+
+    print(" * %s" % file_name)
+    print("   * start_timestamp: %d" % diagnosis_keys.start_timestamp)
+    print("   * end_timestamp: %d" % diagnosis_keys.end_timestamp)
+    print("   * region: %s" % diagnosis_keys.region)
+    print("   * batch_num: %d" % diagnosis_keys.batch_num)
+    print("   * batch_size: %d" % diagnosis_keys.batch_size)
+
+    print("   * keys:")
+    for index, key in enumerate(diagnosis_keys.keys):
+        _print_key(key, index)
+
+    print("   * revised_keys:")
+    for index, key in enumerate(diagnosis_keys.revised_keys):
+        _print_key(key, index)
+
+
 def main(argv):
     del argv  # Unused.
+
+    diagnosis_keys_list_url = None
+    if FLAGS.diagnosis_keys_list_url is not None:
+        diagnosis_keys_list_url = FLAGS.diagnosis_keys_list_url
+    else:
+        diagnosis_keys_list_url = os.environ['COCOA_DIAGNOSIS_KEYS_LIST_URL']
 
     dir = os.path.dirname(FLAGS.output_path)
     os.makedirs(dir, exist_ok=True)
@@ -232,7 +272,7 @@ def main(argv):
 
     print("Start")
 
-    list_file_path = _download_diagnosis_keys_list()
+    list_file_path = _download_diagnosis_keys_list(diagnosis_keys_list_url)
 
     diagnosis_keys_entries = []
     with open(list_file_path) as fp:
@@ -244,6 +284,10 @@ def main(argv):
         diagnosis_keys_file_path = _get_diagnosis_keys_file(entry)
         entry.diagnosis_keys = _get_diagnosis_keys(diagnosis_keys_file_path)
         os.remove(diagnosis_keys_file_path)
+
+    if FLAGS.verbose:
+        for entry in diagnosis_keys_entries:
+            _print(entry)
 
     # Statistics
     statistics_list = _statistics(diagnosis_keys_entries)
