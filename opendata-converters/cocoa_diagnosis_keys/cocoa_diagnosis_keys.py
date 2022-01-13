@@ -19,7 +19,7 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string("diagnosis_keys_list_url", None, "URL of the server that is providing the diagnosis-keys list.")
 flags.DEFINE_string("tmp_path", "/tmp/cocoa_diagnosis_keys", "Temporary Path")
 flags.DEFINE_string("output_path", "./v1/cocoa_diagnosis_keys/latest.csv", "Output-file path")
-flags.DEFINE_boolean("verbose", True, "Output verbose")
+flags.DEFINE_boolean("verbose", False, "Output verbose")
 
 FILENAME_EXPORT_BIN = "export.bin"
 BIN_HEADER = "EK Export v1    "
