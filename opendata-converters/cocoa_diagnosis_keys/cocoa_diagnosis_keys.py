@@ -25,6 +25,8 @@ FILENAME_EXPORT_BIN = "export.bin"
 BIN_HEADER = "EK Export v1    "
 BIN_HEADER_BYTES_LENGTH = len(BIN_HEADER.encode(encoding='utf-8'))
 
+JST = datetime.timezone(datetime.timedelta(hours=9), 'Asia/Tokyo')
+
 
 class Entry:
     url = None
@@ -219,7 +221,12 @@ DICT_REPORT_TYPE = {
 def _print_key(key, index):
     key_data = base64.b64encode(key.key_data).decode('utf-8')
 
+    type = "v1"
+    if key.HasField("report_type") and key.HasField("days_since_onset_of_symptoms"):
+        type = "v2"
+
     print("     * Index %d" % index)
+    print("       * type: %s" % type)
     print("       * key_data: %s" % key_data)
     print("       * transmission_risk_level: %s" % DICT_TRANSMISSION_RISK_LEVEL[key.transmission_risk_level])
     print("       * rolling_start_interval_number: %s" % key.rolling_start_interval_number)
@@ -233,25 +240,30 @@ def _print_key(key, index):
     if not key.HasField("days_since_onset_of_symptoms"):
         print("       * days_since_onset_of_symptoms: N/A")
     else:
-        print("       * %d" % key.days_since_onset_of_symptoms)
+        print("       * days_since_onset_of_symptoms: %d" % key.days_since_onset_of_symptoms)
 
 
 def _print(entry):
     file_name = os.path.basename(entry.zip_file_path)
     diagnosis_keys = entry.diagnosis_keys
 
+    created_datetime = datetime.datetime.fromtimestamp(entry.created / 1000).astimezone(JST)
+    start_datetime = datetime.datetime.fromtimestamp(diagnosis_keys.start_timestamp).astimezone(JST)
+    end_datetime = datetime.datetime.fromtimestamp(diagnosis_keys.end_timestamp).astimezone(JST)
+
     print(" * %s" % file_name)
-    print("   * start_timestamp: %d" % diagnosis_keys.start_timestamp)
-    print("   * end_timestamp: %d" % diagnosis_keys.end_timestamp)
+    print("   * created: %s (%d)" % (created_datetime, entry.created))
+    print("   * start_timestamp: %s (%d)" % (start_datetime, diagnosis_keys.start_timestamp))
+    print("   * end_timestamp: %s (%d)" % (end_datetime, diagnosis_keys.end_timestamp))
     print("   * region: %s" % diagnosis_keys.region)
     print("   * batch_num: %d" % diagnosis_keys.batch_num)
     print("   * batch_size: %d" % diagnosis_keys.batch_size)
 
-    print("   * keys:")
+    print("   * %d keys:" % (len(diagnosis_keys.keys)))
     for index, key in enumerate(diagnosis_keys.keys):
         _print_key(key, index)
 
-    print("   * revised_keys:")
+    print("   * %d revised_keys:" % (len(diagnosis_keys.revised_keys)))
     for index, key in enumerate(diagnosis_keys.revised_keys):
         _print_key(key, index)
 
