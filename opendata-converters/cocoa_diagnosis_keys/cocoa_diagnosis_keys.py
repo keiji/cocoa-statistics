@@ -236,7 +236,7 @@ def _print_key(key, index):
     if not key.HasField("report_type"):
         print("       * report_type: N/A")
     else:
-        print("       * %s" % DICT_REPORT_TYPE[key.report_type])
+        print("       * report_type: %s" % DICT_REPORT_TYPE[key.report_type])
 
     if not key.HasField("days_since_onset_of_symptoms"):
         print("       * days_since_onset_of_symptoms: N/A")
