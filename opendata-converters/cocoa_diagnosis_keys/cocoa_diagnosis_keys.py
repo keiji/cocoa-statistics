@@ -198,14 +198,15 @@ def _statistics(diagnosis_keys_entries):
 
 
 DICT_TRANSMISSION_RISK_LEVEL = {
-    0: "Unused/Custom",
-    1: "Confirmed test: Low transmission risk level",
-    2: "Confirmed test: Standard transmission risk level",
-    3: "Confirmed test: High transmission risk level",
-    4: "Confirmed clinical diagnosis",
-    5: "Self report",
-    6: "Negative case",
-    7: "Recursive case",
+    0: "RISK_LEVEL_INVALID",
+    1: "RISK_LEVEL_LOWEST",
+    2: "RISK_LEVEL_LOW",
+    3: "RISK_LEVEL_LOW_MEDIUM",
+    4: "RISK_LEVEL_MEDIUM",
+    5: "RISK_LEVEL_MEDIUM_HIGH",
+    6: "RISK_LEVEL_HIGH",
+    7: "RISK_LEVEL_VERY_HIGH",
+    8: "RISK_LEVEL_HIGHEST",
 }
 
 DICT_REPORT_TYPE = {
