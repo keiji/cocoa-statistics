@@ -1,7 +1,7 @@
 {
   "tokyo": {
-    "url": "https://www.fukushihoken.metro.tokyo.lg.jp/iryo/kansen/corona_portal/soudan/hatsunetsugairai.files/040216shinryoukensa00.xlsx",
-    "comment": "https://www.fukushihoken.metro.tokyo.lg.jp/iryo/kansen/corona_portal/soudan/hatsunetsugairai.html"
+    "url": "https://www.opendata.metro.tokyo.lg.jp/fukushihoken/130001_shinryoukensa20220216.csv",
+    "comment": "https://catalog.data.metro.tokyo.lg.jp/dataset/t000010d0000000095"
   },
   "comment": ""
 }

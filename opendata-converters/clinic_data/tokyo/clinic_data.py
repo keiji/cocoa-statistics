@@ -16,6 +16,8 @@ flags.DEFINE_string("tmp_path", "/tmp", "Temporary path")
 flags.DEFINE_string("output_csv_path", "./test/latest.csv", "Output csv file path")
 flags.DEFINE_string("output_json_path", "./test/latest.json", "Output json file path")
 
+# https://www.fukushihoken.metro.tokyo.lg.jp/iryo/kansen/corona_portal/soudan/hatsunetsugairai.files/040216shinryoukensa00.xlsx
+
 # RFC3339
 FORMAT_RFC3339 = "%Y-%m-%dT%H:%M:%S.%f%z"
 
