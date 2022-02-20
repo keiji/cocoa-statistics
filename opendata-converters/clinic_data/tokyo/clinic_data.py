@@ -71,6 +71,13 @@ def _convert(string):
     return "".join(result)
 
 
+def _to_string(val):
+    if type(val) == bool:
+        return str(val).lower()
+    else:
+        return str(val)
+
+
 class ClinicInfo:
 
     @staticmethod
@@ -207,7 +214,7 @@ class ClinicInfo:
             self.open_holiday,
             self.note,
         ]
-        row = list(map(lambda val: str(val) if val is not None else "", row))
+        row = list(map(lambda val: _to_string(val) if val is not None else "", row))
         csv_writer.writerow(row)
 
     def to_dict(self):
