@@ -21,14 +21,14 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
-          pip3 install -r ${{ github.workspace }}/clinic_data/tokyo/requirements.txt
+          pip3 install -r ${{ github.workspace }}/opendata-converters/clinic_data/tokyo/requirements.txt
       - name: Convert
         run: |
           cd ${{ github.workspace }}/clinic_data/tokyo
           python3 clinic_data.py \
-            --config_path ${{ github.workspace }}/clinic_data/sources.json \
-            --output_csv_path ${{ github.workspace }}/output/v1/clinic_data/tokyo/latest.csv \
-            --output_json_path ${{ github.workspace }}/output/v1/clinic_data/tokyo/latest.json
+            --config_path ${{ github.workspace }}/opendata-converters/clinic_data/sources.json \
+            --output_csv_path ${{ github.workspace }}/opendata-converters/output/v1/clinic_data/tokyo/latest.csv \
+            --output_json_path ${{ github.workspace }}/opendata-converters/output/v1/clinic_data/tokyo/latest.json
       # - name: Deploy
       #   uses: JamesIves/github-pages-deploy-action@4.1.5
       #   with:
