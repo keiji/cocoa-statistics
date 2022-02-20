@@ -24,7 +24,7 @@ jobs:
           pip3 install -r ${{ github.workspace }}/opendata-converters/clinic_data/tokyo/requirements.txt
       - name: Convert
         run: |
-          cd ${{ github.workspace }}/clinic_data/tokyo
+          cd ${{ github.workspace }}/opendata-converters/clinic_data/tokyo
           python3 clinic_data.py \
             --config_path ${{ github.workspace }}/opendata-converters/clinic_data/sources.json \
             --output_csv_path ${{ github.workspace }}/opendata-converters/output/v1/clinic_data/tokyo/latest.csv \
