@@ -1,0 +1,40 @@
+# This is a basic workflow to help you get started with Actions
+
+name: clinic_data_tokyo
+
+on:
+  schedule:
+    - cron:  '0 */12 * * *'
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install -r ${{ github.workspace }}/clinic_data/tokyo/requirements.txt
+      - name: Convert
+        run: |
+          cd ${{ github.workspace }}/clinic_data/tokyo
+          python3 clinic_data.py \
+            --config_path ${{ github.workspace }}/clinic_data/sources.json \
+            --output_csv_path ${{ github.workspace }}/output/v1/clinic_data/tokyo/latest.csv \
+            --output_json_path ${{ github.workspace }}/output/v1/clinic_data/tokyo/latest.json
+      # - name: Deploy
+      #   uses: JamesIves/github-pages-deploy-action@4.1.5
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     branch: gh-pages
+      #     folder: ${{ github.workspace }}/output
+      #     clean: false
+      #     git-config-name: cocoa-statistics
+      #     git-config-email: noreply@keiji.dev
