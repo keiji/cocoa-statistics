@@ -21,7 +21,7 @@ FORMAT_RFC3339 = "%Y-%m-%dT%H:%M:%S.%f%z"
 
 JST = datetime.timezone(datetime.timedelta(hours=9), 'Asia/Tokyo')
 
-#
+IGNORE_CODE_x000D = "_x000D_"
 
 HEADER1 = [
     None, '医療機関名', '電話番号\n(web予約URL)', '対象者\n（★：小児or妊婦以外対応不可）', None, None, '住所\n区市町村',
@@ -154,7 +154,9 @@ class ClinicInfo:
             return None
 
     def __init__(self, row):
-        self.name = str(row[1])
+        self.name = str(row[1]) \
+            .replace(IGNORE_CODE_x000D, "") \
+            .replace("\n", " ")
         self.note = ""
 
         self.note += ClinicInfo.parse_note(row[2])
