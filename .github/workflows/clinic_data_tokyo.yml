@@ -34,7 +34,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
-          folder: ${{ github.workspace }}/output
+          folder: ${{ github.workspace }}/opendata-converters/output
           clean: false
           git-config-name: cocoa-statistics
           git-config-email: noreply@keiji.dev
