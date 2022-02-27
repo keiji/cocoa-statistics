@@ -13,26 +13,6 @@ flags.DEFINE_string("config_path", None, "Config file path")
 flags.DEFINE_string("tmp_path", "/tmp", "Temporary path")
 flags.DEFINE_string("output_path", "./test/latest.csv", "Output file path")
 
-HEADER = [
-    "\ufeff検索キー", "公開用_医療機関ID",
-    "医療機関名", "正規化住所", "郵便番号",
-    "電話番号", "オンライン予約用ページアドレス",
-    "相談センター等からの紹介",
-    "自院患者", "濃厚接触者", "小児", "妊婦",
-    "区市町村", "行政コード",
-    "大字", "それ以降の住所", "ビル名・階数・部屋番号",
-    "PCR", "抗原定量", "抗原定性", "鼻咽頭", "鼻腔", "唾液", "その他",
-    "月（午前）", "月（午後）",
-    "火（午前）", "火（午後）",
-    "水（午前）", "水（午後）",
-    "木（午前）", "木（午後）",
-    "金（午前）", "金（午後）",
-    "土（午前）", "土（午後）",
-    "日（午前）", "日（午後）",
-    "対応できる外国語", "診療検査日時が祝日の場合",
-    "それ以降の住所"
-]
-
 
 def _download_opendata(url):
     name = os.path.basename(url)
@@ -48,18 +28,25 @@ def _download_opendata(url):
         return last_modified, file_path
 
 
-def _load_endpoint_url(config_path):
+def _load_settings(config_path):
     with open(config_path, mode='r') as fp:
         json_obj = json.load(fp)
-        return json_obj["tokyo"]["url"]
+        return json_obj["tokyo"]
 
 
-def _validate(file_path):
+def _validate(file_path, required_header):
     with open(file_path, mode='r') as fp:
         csv_reader = csv.reader(fp)
         for row in csv_reader:
             print(row)
-            return row == HEADER
+            return _validate_header(required_header, row)
+
+
+def _validate_header(required_header, header_row):
+    for required_column in required_header:
+        if not required_column in header_row:
+            return False
+    return True
 
 
 def main(argv):
@@ -68,13 +55,15 @@ def main(argv):
     assert FLAGS.config_path is not None, "Parameter --config_path must be set."
     assert os.path.exists(FLAGS.config_path), FLAGS.config_path + " is not exist."
 
-    url = _load_endpoint_url(FLAGS.config_path)
+    settings = _load_settings(FLAGS.config_path)
+    url = settings["url"]
+    required_headers = settings["required_headers"]
 
     os.makedirs(os.path.dirname(FLAGS.output_path), exist_ok=True)
 
     last_modified, file_path = _download_opendata(url)
 
-    assert _validate(file_path), "Header validation failed."
+    assert _validate(file_path, required_headers), "Header validation failed."
 
     try:
         shutil.move(file_path, FLAGS.output_path)
