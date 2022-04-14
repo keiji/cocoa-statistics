@@ -35,7 +35,7 @@ def _load_settings(config_path):
 
 
 def _validate(file_path, required_header):
-    with open(file_path, mode='r') as fp:
+    with open(file_path, mode='r', encoding="utf-8-sig") as fp:
         csv_reader = csv.reader(fp)
         for row in csv_reader:
             print(row)
@@ -44,7 +44,7 @@ def _validate(file_path, required_header):
 
 def _validate_header(required_header, header_row):
     for required_column in required_header:
-        if not required_column in header_row:
+        if required_column not in header_row:
             return False
     return True
 
